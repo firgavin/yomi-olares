@@ -1,0 +1,17 @@
+# Olares injects the envs declared in OlaresManifest.yaml (user value or default) into olaresEnv.
+olaresEnv: {}
+
+image:
+  # Image to deploy. Default is a placeholder — build from docker/Dockerfile and push to
+  # your own registry, then update both fields here.
+  repository: ghcr.io/your-account/yomi
+  tag: "0.7.75"
+  pullPolicy: IfNotPresent
+
+resources:
+  requests:
+    cpu: 250m
+    memory: 512Mi
+  limits:
+    cpu: "2"
+    memory: 4Gi

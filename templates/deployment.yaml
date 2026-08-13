@@ -1,0 +1,63 @@
+{{- $oe := .Values.olaresEnv | default dict }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: yomi
+  namespace: {{ .Release.Namespace }}
+  labels:
+    io.kompose.service: yomi
+spec:
+  replicas: 1
+  strategy:
+    # Single copy of state on a hostPath volume — rolling would double-mount it.
+    type: Recreate
+  selector:
+    matchLabels:
+      io.kompose.service: yomi
+  template:
+    metadata:
+      labels:
+        io.kompose.network/chrome-default: "true"
+        io.kompose.service: yomi
+    spec:
+      restartPolicy: Always
+      containers:
+        - name: yomi
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          # Model config uses yomi's native env override mechanism (no config file needed):
+          # these build an in-memory model named "from_env", pinned as the default below.
+          # Editable post-install via the app Settings page (applyOnChange restarts the app).
+          env:
+            - name: HOME
+              value: /home/yomi
+            # Daemon WebSocket listener, exposed as the yomi-ws entrance (platform-auth fronted)
+            - name: YOMI_SOCKET
+              value: ws://0.0.0.0:57231
+            - name: TZ
+              value: {{ index $oe "TZ" | default "Etc/UTC" | quote }}
+            - name: YOMI_PROVIDER
+              value: {{ index $oe "MODEL_PROVIDER" | default "openai" | quote }}
+            - name: YOMI_API_BASE
+              value: {{ index $oe "MODEL_ENDPOINT" | default "https://api.openai.com/v1" | quote }}
+            - name: YOMI_API_KEY
+              value: {{ index $oe "MODEL_API_KEY" | default "" | quote }}
+            - name: YOMI_MODEL
+              value: {{ index $oe "MODEL_ID" | default "" | quote }}
+            - name: YOMI_DEFAULT_MODEL
+              value: "from_env"
+          ports:
+            - name: ws
+              containerPort: 57231
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+            - name: home
+              mountPath: /home/yomi
+      volumes:
+        # Entire $HOME lives in the yomi/ subdirectory of the user's Home,
+        # manageable from the Olares Files app.
+        - name: home
+          hostPath:
+            type: DirectoryOrCreate
+            path: '{{ .Values.userspace.userData }}/yomi'

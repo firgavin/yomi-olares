@@ -1,0 +1,133 @@
+olaresManifest.version: '0.12.0'
+olaresManifest.type: app
+apiVersion: 'v3'
+
+workloadReplicas:
+  yomi: 1
+
+metadata:
+  name: yomi
+  # Official yomi app icon (512x512 PNG), commit-pinned via jsDelivr CDN
+  icon: https://cdn.jsdelivr.net/gh/Crescent617/yomi@d40b25f15563edf8827fdb456ecc24631abe55bf/crates/gui/icons/icon.png
+  description: Self-hosted, always-on AI inbox agent powered by yomi
+  appid: yomi
+  title: Yomi
+  version: 0.1.0
+  categories:
+  - Developer Tools
+
+entrances:
+# WebSocket protocol endpoint of the yomi daemon, for attaching a local yomi CLI/TUI.
+# Invisible because it is not a web UI. authLevel: internal puts Olares platform auth in
+# front — the daemon protocol itself is unauthenticated full agent control, so do NOT
+# downgrade this to public.
+- name: yomi-ws
+  host: yomi
+  port: 57231
+  title: Yomi Daemon WebSocket
+  icon: https://cdn.jsdelivr.net/gh/Crescent617/yomi@d40b25f15563edf8827fdb456ecc24631abe55bf/crates/gui/icons/icon.png
+  invisible: true
+  authLevel: internal
+
+spec:
+  versionName: '0.7.75'
+  fullDescription: |
+    **Yomi** is a self-hosted, always-on AI inbox agent powered by the open-source
+    [yomi](https://github.com/Crescent617/yomi) project.
+
+    Talk to it through chat channels (e.g. a Feishu/Lark bot), manage its files through the
+    Olares Files app (`Home/yomi`), or attach a local `yomi tui` to the daemon over the
+    WebSocket entrance.
+
+    **Usage**
+    - The default model comes from the install parameters (provider / endpoint / API key /
+      model id) and is injected as yomi's native `YOMI_*` environment variables — no config
+      file required. Change them later in Settings; the app restarts automatically.
+    - Chat channels are configured via file only: create `Home/yomi/.yomi/config.toml` in the
+      Files app with a channel block (see the project README for an example) and restart the app.
+    - `YOMI_*` environment variables take precedence over matching keys in `config.toml`.
+    - Install skills by dropping them into `Home/yomi/.agents/skills` (or
+      `Home/yomi/.yomi/skills`), then restart the app or run `yomi daemon reload`.
+    - Remote attach: locate the `yomi-ws` entrance URL on the app detail page, install the same
+      yomi version locally, then run `YOMI_SOCKET=wss://<entrance-url> yomi tui`.
+
+  upgradeDescription: |
+    Initial Olares packaging: yomi 0.7.75, single Deployment, Home-backed persistence,
+    WebSocket entrance with platform auth, env-based model configuration.
+
+  developer: Crescent617
+  website: https://github.com/Crescent617/yomi
+  sourceCode: https://github.com/Crescent617/yomi
+  submitter: firgavin
+  locale:
+  - en-US
+  - zh-CN
+  doc: https://github.com/Crescent617/yomi
+  license:
+  - text: AGPL-3.0
+    url: https://github.com/Crescent617/yomi/blob/main/LICENSE
+  requiredMemory: 512Mi
+  limitedMemory: 4Gi
+  requiredDisk: 1Gi
+  limitedDisk: 10Gi
+  requiredCpu: 0.5
+  limitedCpu: 2
+  supportArch:
+  - amd64
+
+permission:
+  # The entire $HOME lives in the `yomi/` subdirectory of the user's Home: sessions, skills,
+  # OAuth tokens and caches persist across restarts and are browsable in the Files app.
+  userData:
+  - Home
+
+options:
+  # Single instance only: the home path is fixed at Home/yomi and would be contended.
+  allowMultipleInstall: false
+  # Long-lived WebSocket connections: disable the entrance timeout.
+  apiTimeout: 0
+  dependencies:
+  - name: olares
+    type: system
+    version: '>=1.12.6-0'
+
+envs:
+# Model: mapped to yomi's native env overrides (YOMI_PROVIDER / YOMI_API_BASE / YOMI_API_KEY /
+# YOMI_MODEL). Editable after install; applyOnChange restarts the app automatically.
+- envName: MODEL_PROVIDER
+  type: string
+  required: false
+  applyOnChange: true
+  editable: true
+  default: "openai"
+  description: Model provider protocol — openai / openai_response / anthropic
+- envName: MODEL_ENDPOINT
+  type: string
+  required: false
+  applyOnChange: true
+  editable: true
+  default: "https://api.openai.com/v1"
+  description: OpenAI-compatible API base URL
+- envName: MODEL_API_KEY
+  type: password
+  required: false
+  applyOnChange: true
+  editable: true
+  default: ""
+  description: Model API key
+- envName: MODEL_ID
+  type: string
+  required: false
+  applyOnChange: true
+  editable: true
+  default: ""
+  description: Model id (e.g. gpt-5, kimi-k3)
+# Note: chat channels (e.g. Feishu) are intentionally NOT install parameters — yomi only reads
+# them from config.toml. Create Home/yomi/.yomi/config.toml manually when needed (see README).
+- envName: TZ
+  type: string
+  required: false
+  applyOnChange: true
+  editable: true
+  default: "Etc/UTC"
+  description: Container timezone

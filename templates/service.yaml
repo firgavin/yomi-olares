@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: yomi
+  namespace: {{ .Release.Namespace }}
+  labels:
+    io.kompose.service: yomi
+spec:
+  ports:
+    - name: ws
+      port: 57231
+      targetPort: 57231
+  selector:
+    io.kompose.service: yomi
