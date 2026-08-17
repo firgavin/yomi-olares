@@ -7,8 +7,8 @@ workloadReplicas:
 
 metadata:
   name: yomi
-  # Official yomi app icon (512x512 PNG), commit-pinned via jsDelivr CDN
-  icon: https://cdn.jsdelivr.net/gh/Crescent617/yomi@d40b25f15563edf8827fdb456ecc24631abe55bf/crates/gui/icons/icon.png
+  # App icon: same artwork downscaled to 256x256 (Market requirement), served from this repo
+  icon: https://cdn.jsdelivr.net/gh/firgavin/yomi-olares@main/icon.png
   description: Self-hosted, always-on AI inbox agent powered by yomi
   appid: yomi
   title: Yomi
@@ -25,7 +25,7 @@ entrances:
   host: yomi
   port: 57231
   title: Yomi Daemon WebSocket
-  icon: https://cdn.jsdelivr.net/gh/Crescent617/yomi@d40b25f15563edf8827fdb456ecc24631abe55bf/crates/gui/icons/icon.png
+  icon: https://cdn.jsdelivr.net/gh/firgavin/yomi-olares@main/icon.png
   invisible: true
   authLevel: internal
 

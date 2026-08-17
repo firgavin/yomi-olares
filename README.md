@@ -18,18 +18,17 @@ This repository **is** the chart (OAC):
 Chart.yaml
 OlaresManifest.yaml     # entrances, permissions, resources, install-time envs
 owners                  # required only for Olares Market submission
-values.yaml             # image coordinates and resource limits
+icon.png                # 256x256 app icon, referenced from OlaresManifest via jsDelivr
+values.yaml             # image coordinates, workload replicas and resource limits
 templates/
   deployment.yaml       # single-container yomi daemon, env-based model config
   service.yaml          # WebSocket port 57231
-docker/
-  Dockerfile            # debian + yomi + basic tools, all sha256-verified
 ```
 
 ## Install on Olares
 
-The chart pulls `image.repository:image.tag` as configured in `values.yaml` (amd64 only —
-upstream yomi publishes no linux/arm64 releases).
+The chart pulls `ghcr.io/crescent617/yomi:0.7.75` (amd64 only — upstream yomi publishes no
+linux/arm64 releases).
 
 Install via **Studio** or the Market's custom installation, loading this chart directory.
 

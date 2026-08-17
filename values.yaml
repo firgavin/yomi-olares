@@ -2,11 +2,14 @@
 olaresEnv: {}
 
 image:
-  # Image to deploy. Default is a placeholder — build from docker/Dockerfile and push to
-  # your own registry, then update both fields here.
-  repository: ghcr.io/your-account/yomi
+  repository: ghcr.io/crescent617/yomi
   tag: "0.7.75"
   pullPolicy: IfNotPresent
+
+# Replica counts per workload, mirrored by workloadReplicas in OlaresManifest.yaml.
+workloads:
+  yomi:
+    replicaCount: 1
 
 resources:
   requests:
